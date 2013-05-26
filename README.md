@@ -11,7 +11,7 @@ npm install logmap -g
 
 # USAGE
 ```bash
-cat test/fixtures/sample.json | logmap ".date, .loglevel, .value" --format "[%d]: (%s) %s"
+cat test/fixtures/sample.json | logmap ".date, .loglevel, .value" -f "[%d]: (%s) %s"
 ```
 
 ### Input
@@ -30,7 +30,7 @@ Because `JSONSelect` gets the data in the order that it is found, you may need
 to specify a special grammar not yet supported by JSONSelect. Below is an 
 example of the grammar and data.
 ```bash
-cat test/fixtures/sample.json | logmap ".date; .loglevel; .value" --format "[%d]: (%s) %s"
+cat test/fixtures/sample.json | logmap ".date; .loglevel; .value" -f "[%d]: (%s) %s"
 ```
 
 ### Input
@@ -43,6 +43,24 @@ cat test/fixtures/sample.json | logmap ".date; .loglevel; .value" --format "[%d]
 ```
 [1369605255506]: (info) Lorem ipsum dolor sit amet.
 [1369605255507]: (info) Mollit anim id est laborum.
+```
+
+# OPTIONS
+If you write a long query, you can save it so you don't have to write it again.
+
+### Save
+```bash
+cat test/fixtures/sample.json | logmap ".date, .loglevel, .value" -f "[%d]: (%s) %s" -s myQuery
+```
+
+### Load
+```bash
+cat test/fixtures/sample.json | logmap -l myQuery
+```
+
+### Load
+```bash
+logmap -d myQuery
 ```
 
 [0]:http://jsonselect.org/#tryit

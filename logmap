@@ -2,16 +2,18 @@
 
 var events = require('events')
 var path = require('path')
+var fs = require('fs')
 
 var es = require('event-stream')
 var JSONSelect = require('JSONSelect')
 var argv = require('optimist').argv
 
 var settingsFile = path.join(process.env['HOME'], '.logmap')
+var settings = {}
 
-if (argv.load || argv.save) {
+if (argv.l || argv.s || argv.d) {
   try {
-    var f = fs.readFileSync(settingsFile)
+    var f = String(fs.readFileSync(settingsFile, { flags: 'a' }))
     settings = JSON.parse(f) || {}
   }
   catch(ex) {
@@ -19,11 +21,27 @@ if (argv.load || argv.save) {
   }
 }
 
-if (argv.save) {
-  delete argv.save
-  settings[argv.save] = argv
+if (argv.s) {
+  settings[argv.s] = argv
   var s = JSON.stringify(settings, 2, 2)
-  fs.writeFileSync(settingsFile, s, { flags: 'a' })
+  fs.writeFileSync(settingsFile, s, { flags: 'w' })
+  delete argv.s
+}
+
+if (argv.d) {
+  delete settings[argv.d]
+  var s = JSON.stringify(settings, 2, 2)
+  fs.writeFileSync(settingsFile, s, { flags: 'w' })
+  process.exit(0)
+}
+
+if (argv.l) {
+  if (settings[argv.l]) {
+    argv = settings[argv.l]
+  }
+  else {
+    console.log('%s not found.', argv.l)
+  }
 }
 
 process.stdin.resume()
@@ -37,8 +55,8 @@ process.stdin
       selectors.split(';').reverse().forEach(function(selector) {
         results = JSONSelect.match(selector, data).concat(results)
       })
-      if (argv.format) {
-        results.unshift(argv.format)
+      if (argv.f) {
+        results.unshift(argv.f)
       }
       console.log.apply(null, results)
     })
