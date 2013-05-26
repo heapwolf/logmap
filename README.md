@@ -2,8 +2,7 @@
 Filter streams of json and format the output using [`JSONSelect`][0]
 
 # MOTIVATION
-bunyan has too much ceremony and is too domain specific, jsontool isn't specific
-enough for the task.
+bunyan has too much ceremony, jsontool isn't specific enough for the task.
 
 # INSTALL
 ```bash
