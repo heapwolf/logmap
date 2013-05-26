@@ -1,5 +1,5 @@
 # SYNOPSIS
-Filter json streams and format the output using [`JSONSelect`][0]
+Filter json streams/logging output using [`JSONSelect`][0] and format the output
 
 # MOTIVATION
 bunyan has too much ceremony and too many features, jsontool isn't specific 
