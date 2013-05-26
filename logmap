@@ -1,0 +1,45 @@
+#!/usr/bin/env node
+
+var events = require('events')
+var path = require('path')
+
+var es = require('event-stream')
+var JSONSelect = require('JSONSelect')
+var argv = require('optimist').argv
+
+var settingsFile = path.join(process.env['HOME'], '.logmap')
+
+if (argv.load || argv.save) {
+  try {
+    var f = fs.readFileSync(settingsFile)
+    settings = JSON.parse(f) || {}
+  }
+  catch(ex) {
+    console.log(ex)
+  }
+}
+
+if (argv.save) {
+  delete argv.save
+  settings[argv.save] = argv
+  var s = JSON.stringify(settings, 2, 2)
+  fs.writeFileSync(settingsFile, s, { flags: 'a' })
+}
+
+process.stdin.resume()
+
+process.stdin
+  .pipe(es.split(argv.split || /\r?\n/))
+  .pipe(es.parse())
+  .on('data', function(data) {
+    argv._.forEach(function(selectors) {
+      var results = []
+      selectors.split(';').reverse().forEach(function(selector) {
+        results = JSONSelect.match(selector, data).concat(results)
+      })
+      if (argv.format) {
+        results.unshift(argv.format)
+      }
+      console.log.apply(null, results)
+    })
+  })

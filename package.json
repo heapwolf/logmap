@@ -1,0 +1,17 @@
+{
+  "name": "logmap",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "JSONSelect": "~0.4.0",
+    "event-stream": "~3.0.14",
+    "optimist": "~0.5.0"
+  },
+  "repository": "git@github.com:hij1nx/logmap.git",
+  "author": "",
+  "license": "MIT"
+}
