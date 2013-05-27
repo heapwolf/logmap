@@ -2,8 +2,7 @@
 Filter json streams/logging output using [`JSONSelect`][0] and format the output
 
 # MOTIVATION
-bunyan has too much ceremony and too many features, jsontool isn't specific 
-enough for the task.
+most tools for this have way too much ceremony and way too many features.
 
 # INSTALL
 ```bash
