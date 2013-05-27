@@ -59,7 +59,7 @@ cat ./sample.json | logmap ".date, .loglevel, .value" -f "[%d]: (%s) %s" -s myQu
 cat ./sample.json | logmap -l myQuery
 ```
 
-### Load
+### Delete
 ```bash
 logmap -d myQuery
 ```
