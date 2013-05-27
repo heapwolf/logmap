@@ -68,4 +68,8 @@ logmap -d myQuery
 If you're logs are delimited by something other than a new-line you can specify
 that with the `--split` argument. By default logs are split on `/\r?\n/`.
 
+### Format
+The resulting data is applied to `console.log()` so you can use `-f` to format
+the results.
+
 [0]:http://jsonselect.org/#tryit
