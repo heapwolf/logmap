@@ -1,8 +1,8 @@
 # SYNOPSIS
-Filter json streams/logging output using [`JSONSelect`][0] and format the output
+Filter new-line-deleimted json streams using simple object selectors.
 
 # MOTIVATION
-most tools for this have way too much ceremony and way too many features.
+your tool has too many features.
 
 # INSTALL
 ```bash
@@ -10,65 +10,47 @@ npm install logmap -g
 ```
 
 # USAGE
-```bash
-cat ./sample.json | logmap ".date, .loglevel, .value" -f "[%d]: (%s) %s"
-```
-
-### Input
+### INPUT
 ```json
-{ "date": "1369605255506", "loglevel": "info", "value": "Lorem ipsum dolor sit amet.", "title": "C++", "id": "001" }
-{ "date": "1369605255507", "loglevel": "info", "value": "Mollit anim id est laborum.", "title": "Javascript", "id": "002" }
+{ "date": "2015-06-25T01:14:21.196+0600", "level": "info", "value": { "msg": "Lorem ipsum dolor sit amet.", "title": "C++", "id": "001" } }
+{ "date": "2015-04-25T01:32:21.196+0600", "level": "info", "value": { "msg": "Mollit anim id est laborum.", "title": "Javascript", "id": "002" } }
 ```
 
-### Output
-```
-[1369605255506]: (info) Lorem ipsum dolor sit amet.
-[1369605255507]: (info) Mollit anim id est laborum.
-```
-
-Because `JSONSelect` gets the data in the order that it is found, you may need 
-to specify a special grammar not yet supported by JSONSelect. Below is an 
-example of the grammar and data.
+### COMMAND
 ```bash
-cat ./sample.json | logmap ".date; .loglevel; .value" -f "[%d]: (%s) %s"
+cat ./sample.json | logmap date level value.msg -f "[%date(DD HH:mm)]: (%s) %s"
 ```
 
-### Input
-```json
-{ "title": "C++", "id": "001", "loglevel": "info", "value": "Lorem ipsum dolor sit amet.", "date": "1369605255506" }
-{ "title": "Javascript", "id": "002", "loglevel": "info", "value": "Mollit anim id est laborum.", "date": "1369605255507" }
+### OUTPUT
+```
+[14 21:32]: (info) Lorem ipsum dolor sit amet.
+[24 21:32]: (info) Mollit anim id est laborum.
 ```
 
-### Output
-```
-[1369605255506]: (info) Lorem ipsum dolor sit amet.
-[1369605255507]: (info) Mollit anim id est laborum.
-```
+### FUN STUFF
+- Neglecting the `-f` option will just output an array of the selected values.
+- You can use any of the object selectors found [`here`](https://github.com/mariocasciaro/object-path#usage)
+- You can do `%color(inverse.red)`, stuff in the parens invokes [`chalk`](https://github.com/chalk/chalk)
+- You can do `%date(MM YY d:mm)`, stuff in the parens invokes [`moment`](https://github.com/moment/moment)
+- You can do regluar things like `%s`, `%s` and `%j`.
 
 # OPTIONS
 If you write a long query, you can save it so you don't have to write it again.
 
-### Save
+### SAVE
 ```bash
 cat ./sample.json | logmap ".date, .loglevel, .value" -f "[%d]: (%s) %s" -s myQuery
 ```
 
-### Load
+### LOAD
 ```bash
 cat ./sample.json | logmap -l myQuery
 ```
 
-### Delete
+### DELETE
 ```bash
 logmap -d myQuery
 ```
 
-### Split
-If you're logs are delimited by something other than a new-line you can specify
-that with the `--split` argument. By default logs are split on `/\r?\n/`.
-
-### Format
-The resulting data is applied to `console.log()` so you can use `-f` to format
-the results.
-
 [0]:http://jsonselect.org/#tryit
+

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-var events = require('events')
+var split = require('split')
 var path = require('path')
 var fs = require('fs')
-
-var es = require('event-stream')
-var JSONSelect = require('JSONSelect')
+var moment = require('moment')
+var chalk = require('chalk')
+var op = require('object-path')
 var argv = require('optimist').argv
 
 var settingsFile = path.join(process.env['HOME'], '.logmap')
@@ -46,18 +46,45 @@ if (argv.l) {
 
 process.stdin.resume()
 
+function fmt(a) {
+
+  var fmtstr = a.shift()
+  var it = 0
+  var color = function(_) { return _ }
+  fmtstr = fmtstr.replace(/(%(\w*)(\((.*?)\))?)/g, function(_, _, arg, _, val) {
+
+    switch(arg) {
+      case 'j': try { val = JSON.stringify(a[it++]); } catch(_) { return '[Circular]' } break
+      case 's': val = String(a[it++]); break
+      case 'd': val = Number(a[it++]); break
+      case 'color': color = op.get(chalk, val); return ''; break
+      case 'yellow': color = chalk.yellow; return ''; break
+      case 'red': color = chalk.red; return ''; break
+      case 'green': color = chalk.green; return ''; break
+      case 'blue': color = chalk.blue; return ''; break
+      case 'cyan': color = chalk.cyan; return ''; break
+      case 'white': color = chalk.white; return ''; break
+      case 'magenta': color = chalk.magenta; return ''; break
+      case 'date': val = moment(a[it++]).format(val); break
+    }
+    return color(val)
+  })
+  console.log(fmtstr)
+}
+
 process.stdin
-  .pipe(es.split(argv.split || /\r?\n/))
-  .pipe(es.parse())
+  .pipe(split(argv.split || /(\r?\n)/))
+  .on('error', function (err) {
+  })
   .on('data', function(data) {
-    argv._.forEach(function(selectors) {
-      var results = []
-      selectors.split(';').reverse().forEach(function(selector) {
-        results = JSONSelect.match(selector, data).concat(results)
-      })
-      if (argv.f) {
-        results.unshift(argv.f)
-      }
-      console.log.apply(null, results)
+    try { data = JSON.parse(data) } catch(ex) { return }
+    var results = []
+    argv._.forEach(function(selector) {
+      results.push(op.get(data, selector))
     })
+    if (argv.f) {
+      results.unshift(argv.f)
+      return fmt(results)
+    }
+    console.log(results)
   })

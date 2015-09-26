@@ -1,6 +1,6 @@
 {
   "name": "logmap",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "description": "",
   "main": "logmap",
   "bin": "./logmap",
@@ -8,9 +8,12 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "JSONSelect": "~0.4.0",
+    "chalk": "^1.1.1",
     "event-stream": "~3.0.14",
-    "optimist": "~0.5.0"
+    "moment": "^2.10.6",
+    "object-path": "^0.9.2",
+    "optimist": "~0.5.0",
+    "split": "^1.0.0"
   },
   "repository": "git@github.com:hij1nx/logmap.git",
   "author": "",
