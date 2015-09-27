@@ -1,6 +1,6 @@
 {
   "name": "logmap",
-  "version": "1.0.1",
+  "version": "2.0.1",
   "description": "",
   "main": "logmap",
   "bin": "./logmap",
