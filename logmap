@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 var split = require('split')
 var path = require('path')
 var fs = require('fs')
@@ -46,18 +45,42 @@ if (argv.l) {
 
 process.stdin.resume()
 
-function fmt(a) {
+var oprRE = /(.*?)(==|!=|<=|>=|<|>)(.*)/g
+var fmtRE = /(%(\d+)?(\w*)(\((.*?)\))?)/g
+
+function parse(s) {
+  try { return (JSON.parse(s)) } catch(ex) { return }
+}
+
+function format(a) {
 
   var fmtstr = a.shift()
   var it = 0
   var color = function(_) { return _ }
-  fmtstr = fmtstr.replace(/(%(\w*)(\((.*?)\))?)/g, function(_, _, arg, _, val) {
+  fmtstr = fmtstr.replace(fmtRE, function(_, _, maxlen, arg, _, val) {
 
     switch(arg) {
-      case 'j': try { val = JSON.stringify(a[it++]); } catch(_) { return '[Circular]' } break
-      case 's': val = String(a[it++]); break
-      case 'd': val = Number(a[it++]); break
-      case 'color': color = op.get(chalk, val); return ''; break
+      case 'j': 
+        try {
+          val = JSON.stringify(a[it++]); }
+        catch(_) {
+          return '[Circular]'
+        }
+      break
+      case 's': 
+        val = String(a[it++])
+        if (maxlen) val = val.substr(0, maxlen)
+      break
+      case 'd': 
+        val = Number(a[it++])
+      break
+      case 'date': 
+      case 'moment': 
+        val = moment(a[it++]).format(val)
+      break
+
+      case 'color': 
+      case 'chalk': color = op.get(chalk, val); return ''; break
       case 'yellow': color = chalk.yellow; return ''; break
       case 'red': color = chalk.red; return ''; break
       case 'green': color = chalk.green; return ''; break
@@ -65,7 +88,6 @@ function fmt(a) {
       case 'cyan': color = chalk.cyan; return ''; break
       case 'white': color = chalk.white; return ''; break
       case 'magenta': color = chalk.magenta; return ''; break
-      case 'date': val = moment(a[it++]).format(val); break
     }
     return color(val)
   })
@@ -74,17 +96,43 @@ function fmt(a) {
 
 process.stdin
   .pipe(split(argv.split || /(\r?\n)/))
-  .on('error', function (err) {
-  })
+  .on('error', function (err) {})
   .on('data', function(data) {
-    try { data = JSON.parse(data) } catch(ex) { return }
     var results = []
-    argv._.forEach(function(selector) {
-      results.push(op.get(data, selector))
+    data = parse(data)
+
+    var ok = argv._.every(function(arg) {
+      if (typeof arg != 'string') return
+      var bop = oprRE.exec(arg)
+
+      if (!bop) {
+        var val = op.get(data, arg)
+        if (!val) return false
+
+        results.push(val)
+        return true
+      }
+
+      var selector = bop[1].trim()
+      var oper = bop[2]
+      var rval = parse(bop[3].trim())
+      var lval = op.get(data, selector)
+      if (!lval) return false
+
+      switch (oper) {
+        case '==': return lval == rval; break
+        case '>': return lval > rval; break
+        case '<': return lval < rval; break
+        case '>=': return lval >= rval; break
+        case '<=': return lval <= rval; break
+        case '!=': return lval != rval; break
+        default: return fase; break
+      }
     })
+    if (!ok) return
     if (argv.f) {
       results.unshift(argv.f)
-      return fmt(results)
+      return format(results)
     }
     console.log(results)
   })
